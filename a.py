@@ -476,8 +476,6 @@ def login_section():
         <p style='color:gray; font-size:16px; margin-top: -8px;'>Campus Food Reimagined 🍽️</p>
     </div>
     """, unsafe_allow_html=True)
-
-    # Login Card UI
     with st.container():
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("<h1>🔐 BUzaato Login</h1>", unsafe_allow_html=True)
@@ -488,16 +486,24 @@ def login_section():
 
         if st.button("Login", key="login_button"):
             if username == FAKE_USERNAME and password == FAKE_PASSWORD:
-                st.success(f"✅ Welcome, {username}!")
                 st.session_state.logged_in = True
                 st.session_state.username = username
-                main_app()
-
-            
+                st.experimental_rerun()
             else:
                 st.error("❌ Invalid credentials. Try again.")
 
         st.markdown("</div>", unsafe_allow_html=True)
+
+# ✅ Init session keys
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+
+# ✅ Main Logic
+if st.session_state.logged_in:
+    main_app()
+else:
+    login_section()
 
 def main_app():
     st.sidebar.title("🍱 BUzaato Menu Hub")
