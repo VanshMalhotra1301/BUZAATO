@@ -402,108 +402,6 @@ FAKE_USERNAME = "admin"
 FAKE_PASSWORD = "pass123"
 
 
-# ---------------------- AUTH SECTION ----------------------
-FAKE_USERNAME = "admin"
-FAKE_PASSWORD = "pass123"
-
-def login_section():
-    st.markdown("""
-    <style>
-    body {
-        background-color: #f2f6fc;
-    }
-
-    .card {
-        background: #ffffff;
-        padding: 2.5rem 2rem;
-        margin-top: 3rem;
-        border-radius: 1rem;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-        max-width: 420px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .card h1 {
-        text-align: center;
-        font-size: 32px;
-        font-weight: 800;
-        background: -webkit-linear-gradient(45deg, #6c63ff, #ff6584);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-    }
-
-    .card p {
-        text-align: center;
-        font-size: 16px;
-        color: #666;
-        margin-top: -0.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .modern-button {
-        display: inline-block;
-        padding: 0.6rem 1.4rem;
-        font-weight: 600;
-        font-size: 15px;
-        color: #fff;
-        background: linear-gradient(45deg, #6c63ff, #ff6584);
-        border: none;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        text-align: center;
-    }
-
-    .modern-button:hover {
-        filter: brightness(1.05);
-        box-shadow: 0 4px 14px rgba(108, 99, 255, 0.25);
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Branding banner
-    st.markdown(f"""
-    <div style='text-align:center; margin-top: -30px; margin-bottom: 20px;'>
-        <h1 style='margin: 0; font-size: 36px;
-            font-weight: 800;
-            background: linear-gradient(45deg, #6c63ff, #ff6584);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;'>
-            BUzaato Services
-        </h1>
-        <p style='color:gray; font-size:16px; margin-top: -8px;'>Campus Food Reimagined 🍽️</p>
-    </div>
-    """, unsafe_allow_html=True)
-    with st.container():
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("<h1>🔐 BUzaato Login</h1>", unsafe_allow_html=True)
-        st.markdown("<p>Your one-stop campus food assistant 🍔</p>", unsafe_allow_html=True)
-
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login", key="login_button"):
-            if username == FAKE_USERNAME and password == FAKE_PASSWORD:
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.rerun()
-            else:
-                st.error("❌ Invalid credentials. Try again.")
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# ✅ Init session keys
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-
-# ✅ Main Logic
-if st.session_state.logged_in:
-    main_app()
-else:
-    login_section()
 
 def main_app():
     st.sidebar.title("🍱 BUzaato Menu Hub")
@@ -775,6 +673,111 @@ def main_app():
 
     elif menu_option == "Chat with BUZaato AI":
         buzaato_ai_chat()
+
+
+
+# ---------------------- AUTH SECTION ----------------------
+FAKE_USERNAME = "admin"
+FAKE_PASSWORD = "pass123"
+
+def login_section():
+    st.markdown("""
+    <style>
+    body {
+        background-color: #f2f6fc;
+    }
+
+    .card {
+        background: #ffffff;
+        padding: 2.5rem 2rem;
+        margin-top: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .card h1 {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        background: -webkit-linear-gradient(45deg, #6c63ff, #ff6584);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .card p {
+        text-align: center;
+        font-size: 16px;
+        color: #666;
+        margin-top: -0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .modern-button {
+        display: inline-block;
+        padding: 0.6rem 1.4rem;
+        font-weight: 600;
+        font-size: 15px;
+        color: #fff;
+        background: linear-gradient(45deg, #6c63ff, #ff6584);
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .modern-button:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 4px 14px rgba(108, 99, 255, 0.25);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Branding banner
+    st.markdown(f"""
+    <div style='text-align:center; margin-top: -30px; margin-bottom: 20px;'>
+        <h1 style='margin: 0; font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #6c63ff, #ff6584);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;'>
+            BUzaato Services
+        </h1>
+        <p style='color:gray; font-size:16px; margin-top: -8px;'>Campus Food Reimagined 🍽️</p>
+    </div>
+    """, unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("<h1>🔐 BUzaato Login</h1>", unsafe_allow_html=True)
+        st.markdown("<p>Your one-stop campus food assistant 🍔</p>", unsafe_allow_html=True)
+
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        if st.button("Login", key="login_button"):
+            if username == FAKE_USERNAME and password == FAKE_PASSWORD:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.rerun()
+            else:
+                st.error("❌ Invalid credentials. Try again.")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# ✅ Init session keys
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+
+# ✅ Main Logic
+if st.session_state.logged_in:
+    main_app()
+else:
+    login_section()
 # ---------------------- LAUNCH ----------------------
 if current_user:
     main_app()    
