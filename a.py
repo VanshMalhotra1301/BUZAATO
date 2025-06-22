@@ -1,34 +1,26 @@
-from utils import typewriter_modern  # ✅ ALREADY WORKS IN STREAMLIT
-
-from buzaato_ai import buzaato_ai_chat
-#from db import create_user, check_user, insert_order, get_orders
 from datetime import datetime
 import streamlit as st
 import qrcode
 from io import BytesIO
-from PIL import Image
-import datetime
 import base64
-import streamlit as st
-from PIL import Image
-import datetime
 import uuid
-from fpdf import FPDF
-import tempfile
-import os
-import streamlit as st
 import time
+from buzaato_ai import buzaato_ai_chat
 
-from supabase import create_client, Client
+global current_user
 
 
+# Set up the page configuration
 st.set_page_config(page_title="BUzaato Login", layout="centered")
+
+# Function to get base64 image
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
 img_base64 = get_base64_image("COMPANY.jpg")
 
+# Typewriter effect function
 def typewriter_modern(text, delay=0.07, font_size="32px", color1="#6c63ff", color2="#ff6584"):
     st.markdown("""
         <style>
@@ -70,6 +62,7 @@ def typewriter_modern(text, delay=0.07, font_size="32px", color1="#6c63ff", colo
     # Final version without the cursor
     placeholder.markdown(f"<div class='typewriter-text'>{display_text}</div>", unsafe_allow_html=True)
 
+# Custom CSS for the app
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
@@ -107,31 +100,6 @@ st.markdown("""
         background: #f9faff;
     }
 
-    .css-18e3th9 {
-        padding: 0 !important;
-        margin: 0 auto !important;
-        max-width: 1000px !important;
-        width: 100% !important;
-        height: 100% !important;
-    }
-
-    .css-1v0mbdj.stSidebar {
-        background: linear-gradient(180deg, #6c63ff, #b39ddb);
-        border-radius: 0 25px 25px 0;
-        box-shadow: 4px 0 30px rgba(108, 99, 255, 0.15);
-        padding-top: 40px;
-        height: 100vh !important;
-        overflow-y: auto;
-        color: #fff !important;
-    }
-
-    .css-1d391kg, .css-1lcbmhc, .css-10trblm, .css-qcqlej, .css-1c7y2kd {
-        color: #ffffff !important;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-
     .stButton>button {
         background: linear-gradient(90deg, #7b68ee, #b388ff);
         color: #fff;
@@ -153,84 +121,24 @@ st.markdown("""
         box-shadow: 0 16px 36px rgba(92, 75, 212, 0.4);
     }
 
-    .stSelectbox, .stTextInput, .stMultiselect, .stRadio>div>div, .stTabs>div>div {
-        background: #f2f5ff;
-        border-radius: 22px;
-        padding: 14px 22px;
-        box-shadow: 0 10px 25px rgba(108, 99, 255, 0.1);
-        border: none;
-        font-weight: 500;
-        font-size: 16px;
-        color: #3c3c3c;
-        transition: all 0.25s ease-in-out;
+    .stTextInput>div>div>input {
+        background-color: #f9fbfd;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        padding: 0.5rem;
     }
 
-    .stSelectbox:hover, .stTextInput:hover, .stMultiselect:hover, .stRadio>div>div:hover, .stTabs>div>div:hover {
-        background: #e3e8ff;
-        box-shadow: 0 12px 32px rgba(108, 99, 255, 0.2);
-    }
-
-    .css-1v0mbdj, .css-1cpxqw2, .css-1d391kg, .css-ffhzg2 {
-        border-radius: 20px !important;
-        box-shadow: 0 10px 30px rgba(108, 99, 255, 0.08);
-        border: none !important;
-    }
-
-    .stRadio>div>label {
-        font-weight: 700;
-        color: #3c3c3c;
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
-
-    .stRadio>div>label:hover {
-        color: #6c63ff;
-    }
-
-    .main h1, .main h2, .main h3 {
-        color: #2c3e50;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        margin-bottom: 24px;
-        text-transform: uppercase;
-        text-shadow: 0 2px 4px rgba(108, 99, 255, 0.2);
-    }
-
-    .stInfo, .stSuccess {
-        border-radius: 25px;
-        padding: 18px 26px;
-        font-weight: 700;
-        box-shadow: 0 6px 18px rgba(108, 99, 255, 0.1);
-        background: #eaf0ff;
-        color: #2c3e50;
-        letter-spacing: 0.02em;
-    }
-
-    ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #e2e5ff;
-        border-radius: 25px;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #7b68ee;
-        border-radius: 25px;
-        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #5c4bd4;
+    .stTextInput label {
+        font-weight: 600;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ---------------------- DATABASE (SIMULATED) ----------------------
-users = st.session_state.setdefault("users", {})
-order_history = st.session_state.setdefault("order_history", {})
-current_user = st.session_state.setdefault("current_user", None)
+# Temporary storage for users and orders
+users = {}
+order_history = []
 
-# ---------------------- MENU DATA ----------------------
+# Menu data
 outlets = {
     "Snapeats": {
         "Rajma Rice": 70,
@@ -320,8 +228,7 @@ agents = {
     "d1": "Renuka 📞 93xx", "d2": "Rashmi 📞 87xx", "c1": "Sambhav 📞 97xx"
 }
 
-# ---------------------- FUNCTIONS ----------------------
-#from fpdf import FPDF
+# Function to calculate the bill
 def calculate_bill(order_items, menu):
     bill = sum(menu[item] for item in order_items)
     for min_amount, discount, freebie in discounts:
@@ -330,6 +237,7 @@ def calculate_bill(order_items, menu):
             return final, discount, freebie
     return bill, 0, ""
 
+# Function to generate QR code
 def generate_qr(total):
     upi_link = f"upi://pay?pa=vanshmalhotra1301@oksbi&pn=BUzaato%20Services&am={total}&cu=INR"
     qr = qrcode.make(upi_link)
@@ -338,11 +246,12 @@ def generate_qr(total):
     buf.seek(0)
     return buf
 
+# Function to get the delivery agent
 def get_agent(hostel):
     return agents.get(hostel.lower(), "❌ No delivery agent for this hostel.")
 
+# Function to record an order
 def record_order(user, outlet, items, total, discount, freebie):
-
     hostel = st.session_state.get("hostel", "N/A")
     agent = get_agent(hostel)
 
@@ -353,56 +262,92 @@ def record_order(user, outlet, items, total, discount, freebie):
         "total": total,
         "discount": discount,
         "freebie": freebie,
-        # "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "status": "Out for Delivery",  # default status
         "agent": agent,
-        "eta": "20–30 mins"
+        "eta": "20–30 mins",
+        "timestamp": datetime.now().isoformat(sep=' ', timespec='seconds')
     }
 
-    if "orders" not in st.session_state:
-        st.session_state.orders = []
-    st.session_state.orders.append(order)
-    # Generate a unique order ID (not stored, just illustrative)
-    order_id = str(uuid.uuid4())[:8].upper()
+    order_history.append(order)
 
-    # Improved timestamp format
-    timestamp = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
-
-    # "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S") # type: ignore
-
-
-    # Optionally log or print the order ID (for internal traceability)
-    print(f"[ORDER CONFIRMED] ID: {order_id} | User: {user} | Time: {timestamp}")
-
-
-
+# Function to get pending orders
 def get_pending_orders(user):
-    # Simulated DB list; replace with real DB queries
-    orders = get_orders(user)
-    pending = [order for order in orders if order.get("status", "Pending") != "Delivered"]
+    pending = [order for order in order_history if order['user'] == user and order['status'] != "Delivered"]
     return pending
 
+# Function to track an order
 def track_order(user):
-    orders = get_orders(user)
-    for order in reversed(orders):
-        if order.get("status", "Pending") != "Delivered":
-            return {
-                "status": order.get("status", "Out for Delivery"),
-                "agent": order.get("agent", "Not Assigned"),
-                "eta": order.get("eta", "20–30 mins")
-            }
+    orders = get_pending_orders(user)
+    if orders:
+        return orders[-1]  # Return the most recent order
     return None
+
+# Function to get support information
 def get_support_info():
     return {
         "phone": "+91-8708546799",
         "email": "support@buzaato.in",
         "hours": "9:00 AM – 9:00 PM"
     }
-FAKE_USERNAME = "admin"
-FAKE_PASSWORD = "pass123"
+
+# Login section
+
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
+
+if "users" not in st.session_state:
+    st.session_state.users = {"admin": "admin123"}
+
+if "hostel" not in st.session_state:
+    st.session_state.hostel = ""
+
+def login_section():
+    st.markdown(f"""
+        <div style='text-align:center;'>
+            <img src='data:image/png;base64,{img_base64}' width='180'/>
+            <h1 style='font-weight:800;
+                background: linear-gradient(45deg, #6c63ff, #ff6584);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;'>BUzaato Services</h1>
+            <p style='color:gray;'>Campus Food Reimagined 🍽️</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    tab1, tab2 = st.tabs(["🔓 Login", "🆕 Sign Up"])
+
+    with tab1:
+        username = st.text_input("👤 Username", key="login_user")
+        password = st.text_input("🔒 Password", type="password", key="login_pass")
+        login_clicked = st.button("🚪 Login")
+
+        if login_clicked:
+            if username == "admin" and password == "admin123":
+                st.success("✅ Admin login successful!")
+                st.stop()
+            elif username in st.session_state.users and st.session_state.users[username] == password:
+                st.session_state.current_user = username
+                st.success(f"✅ Welcome back, {username}!")
+                typewriter_modern("Loading BUzaato dashboard...", delay=0.05)
+                st.rerun()
+            else:
+                st.error("❌ Invalid credentials. Please try again.")
+
+    with tab2:
+        new_user = st.text_input("👤 Create Username", key="new_user")
+        new_pass = st.text_input("🔒 Create Password", type="password", key="new_pass")
+        signup_clicked = st.button("📝 Create Account")
+
+        if signup_clicked:
+            if new_user in st.session_state.users:
+                st.warning("⚠️ That username is already taken.")
+            else:
+                st.session_state.users[new_user] = new_pass
+                st.success("🎉 Account created successfully!")
+                typewriter_modern(f"Welcome {new_user} to BUzaato! 💜", delay=0.06)
+                main_app()
 
 
-
+# Main application
 def main_app():
     st.sidebar.title("🍱 BUzaato Menu Hub")
     st.markdown("""
@@ -412,62 +357,8 @@ def main_app():
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         color: #2c3e50;
     }
-
-    /* Heading styles */
-    .main h1, .main h2, .main h3 {
-        color: #2c3e50;
-        font-weight: 700;
-    }
-
-    /* Sidebar panel */
-    .stSidebar {
-        background: linear-gradient(to bottom, #ffffff, #f0f4f8) !important;
-        border-right: 1px solid #e0e0e0;
-        padding-top: 1rem;
-    }
-
-    /* Sidebar text */
-    .css-1d391kg, .css-1lcbmhc, .css-1v0mbdj, .css-10trblm, .css-qcqlej, .css-1c7y2kd {
-        color: #2e3b4e !important;
-        font-weight: 500;
-    }
-
-    /* Button styles */
-    .stButton>button {
-        background: linear-gradient(90deg, #42a5f5, #66bb6a);
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        padding: 10px 20px;
-        font-weight: bold;
-        font-size: 16px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-
-    .stButton>button:hover {
-        background: linear-gradient(90deg, #66bb6a, #42a5f5);
-        transform: scale(1.04);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Radio label */
-    .stRadio>div>label {
-        font-weight: 600;
-        color: #37474f;
-        font-size: 16px;
-    }
-
-    /* Inline code blocks */
-    code {
-        background-color: #e3f2fd;
-        color: #1e88e5;
-        padding: 3px 8px;
-        border-radius: 8px;
-        font-size: 14px;
-    }
     </style>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     # Welcome banner
     st.markdown(f"""
@@ -481,13 +372,14 @@ def main_app():
             text-align: center;
             margin-bottom: 25px;
             box-shadow: 0 6px 18px rgba(0,0,0,0.05);'>
-            👋 Welcome <span style='color:#2c3e50;'>{current_user}</span> – <i>BUzaato Services India</i>
+            👋 Welcome <span style='color:#2c3e50;'>{st.session_state.current_user}
+</span> – <i>BUzaato Services India</i>
         </div>
     """, unsafe_allow_html=True)
 
     # Sidebar branding
     st.sidebar.markdown("### 🍽️ <span style='color:#2c3e50;'>BUzaato Services</span>", unsafe_allow_html=True)
-    st.sidebar.markdown(f"<span style='color:#455a64;'>👤 Logged in as:</span> <code>{current_user}</code>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<span style='color:#455a64;'>👤 Logged in as:</span> <code>{st.session_state.current_user}</code>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
 
     # Logout button
@@ -495,13 +387,13 @@ def main_app():
         st.session_state.current_user = None
         st.rerun()
 
+
     menu_option = st.sidebar.radio("📌 Navigate", [
             "🛒 Place Order", "📜 My Orders", "💸 Offers", 
             "📦 Pending Deliveries", "📍 Track My Order", 
             "📞 Contact Support", 
             "Chat with BUZaato AI"
         ])
-    
     
     if menu_option == "🛒 Place Order":
         st.markdown("""
@@ -531,7 +423,7 @@ def main_app():
                     </ul>
                     <b>Subtotal:</b> ₹{bill}<br>
                     <b>Discount:</b> {discount}%<br>
-                    <b>Final Total:</b> ₹{total:.2f}
+                                        <b>Final Total:</b> ₹{total:.2f}
                 </div>
             """, unsafe_allow_html=True)
 
@@ -562,11 +454,11 @@ def main_app():
                 if not hostel or not room:
                     st.error("❗ Please enter both hostel and room number.")
                 else:
-                    record_order(current_user, outlet, order_items, total, discount, freebie)
+                    record_order({st.session_state.current_user}, outlet, order_items, total, discount, freebie)
                     st.balloons()
                     st.success("🎉 Your order has been placed successfully!")
 
-                    typewriter_modern(f"Thank you {current_user} for ordering from BUzaato Services India 💜", delay=0.07)
+                    typewriter_modern(f"Thank you {{st.session_state.current_user}} for ordering from BUzaato Services India 💜", delay=0.07)
 
                     if payment == "Pay Online":
                         st.image(generate_qr(total), caption="📲 Scan this to Pay", width=250)
@@ -576,10 +468,10 @@ def main_app():
         else:
             st.warning("⚠️ Please select at least one item to proceed with your order.")
 
-
     elif menu_option == "📦 Pending Deliveries":
         st.markdown("<h2 style='color:#2c3e50;'>📦 Pending Deliveries</h2>", unsafe_allow_html=True)
-        pending = get_pending_orders(current_user)
+        pending = get_pending_orders({st.session_state.current_user}
+)
         if not pending:
             st.success("✅ All your orders have been delivered.")
         else:
@@ -587,14 +479,13 @@ def main_app():
                 with st.expander(f"🧾 {order['timestamp']} - {order['outlet']} - ₹{order['total']}"):
                     st.write("**Items:**", order["items"])
                     st.write("**Delivery Agent:**", order.get("agent", "Not Assigned"))
-
-
                     st.warning("⏳ Status: Out for Delivery")
 
     elif menu_option == "📍 Track My Order":
         st.markdown("<h2 style='color:#2c3e50;'>📍 Track Your Order in Real-Time</h2>", unsafe_allow_html=True)
 
-        tracking_info = track_order(current_user)
+        tracking_info = track_order({st.session_state.current_user}
+)
 
         if tracking_info:
             status = tracking_info["status"]
@@ -646,140 +537,22 @@ def main_app():
 
     elif menu_option == "📜 My Orders":
         st.markdown("<h2 style='color:#2c3e50;'>📜 Order History</h2>", unsafe_allow_html=True)
-        history = get_orders(current_user)
-        if not history:
+        if not order_history:
             st.info("📭 You haven’t placed any orders yet.")
         else:
-            for order in history:
-                with st.expander(f"🧾 {order['timestamp']} - {order['outlet']} - ₹{order['total']}"):
-                    st.markdown("**Items Ordered:**")
-                    for item in order["items"].split(', '):
-                        st.write(f"• {item}")
-                    st.markdown(f"**Discount:** {order['discount']}%")
-                    if order['freebie']:
-                        st.markdown(f"**Freebie:** {order['freebie']}")
-
-    elif menu_option == "💸 Offers":
-        st.markdown("<h2 style='color:#2c3e50;'>💸 Current Offers</h2>", unsafe_allow_html=True)
-        for min_amt, discount, freebie in discounts:
-            offer = f"👉 <b>{discount}% OFF</b> on orders above ₹{min_amt}"
-            if freebie:
-                offer += f" + Freebie: <b>{freebie}</b>"
-            st.markdown(f"""
-                <div style='background:#fff3e0;padding:12px;border-radius:10px;margin-bottom:10px;'>
-                    {offer}
-                </div>
-            """, unsafe_allow_html=True)
-
+            for order in order_history:
+                if order['user'] == {st.session_state.current_user}:
+                    with st.expander(f"🧾 {order['timestamp']} - {order['outlet']} - ₹{order['total']}"):
+                        st.markdown("**Items Ordered:**")
+                        for item in order["items"].split(', '):
+                            st.write(f"• {item}")
+                        st.markdown(f"**Discount:** {order['discount']}%")
+                        if order['freebie']:
+                            st.markdown(f"**Freebie:** {order['freebie']}")
     elif menu_option == "Chat with BUZaato AI":
         buzaato_ai_chat()
-
-
-
-# ---------------------- AUTH SECTION ----------------------
-FAKE_USERNAME = "admin"
-FAKE_PASSWORD = "pass123"
-
-def login_section():
-    st.markdown("""
-    <style>
-    body {
-        background-color: #f2f6fc;
-    }
-
-    .card {
-        background: #ffffff;
-        padding: 2.5rem 2rem;
-        margin-top: 3rem;
-        border-radius: 1rem;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-        max-width: 420px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .card h1 {
-        text-align: center;
-        font-size: 32px;
-        font-weight: 800;
-        background: -webkit-linear-gradient(45deg, #6c63ff, #ff6584);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-    }
-
-    .card p {
-        text-align: center;
-        font-size: 16px;
-        color: #666;
-        margin-top: -0.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .modern-button {
-        display: inline-block;
-        padding: 0.6rem 1.4rem;
-        font-weight: 600;
-        font-size: 15px;
-        color: #fff;
-        background: linear-gradient(45deg, #6c63ff, #ff6584);
-        border: none;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        text-align: center;
-    }
-
-    .modern-button:hover {
-        filter: brightness(1.05);
-        box-shadow: 0 4px 14px rgba(108, 99, 255, 0.25);
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Branding banner
-    st.markdown(f"""
-    <div style='text-align:center; margin-top: -30px; margin-bottom: 20px;'>
-        <h1 style='margin: 0; font-size: 36px;
-            font-weight: 800;
-            background: linear-gradient(45deg, #6c63ff, #ff6584);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;'>
-            BUzaato Services
-        </h1>
-        <p style='color:gray; font-size:16px; margin-top: -8px;'>Campus Food Reimagined 🍽️</p>
-    </div>
-    """, unsafe_allow_html=True)
-    with st.container():
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("<h1>🔐 BUzaato Login</h1>", unsafe_allow_html=True)
-        st.markdown("<p>Your one-stop campus food assistant 🍔</p>", unsafe_allow_html=True)
-
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login", key="login_button"):
-            if username == FAKE_USERNAME and password == FAKE_PASSWORD:
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.rerun()
-            else:
-                st.error("❌ Invalid credentials. Try again.")
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# ✅ Init session keys
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-
-# ✅ Main Logic
-if st.session_state.logged_in:
+# Launch the application
+if st.session_state.current_user:
     main_app()
-else:
-    login_section()
-# ---------------------- LAUNCH ----------------------
-if current_user:
-    main_app()    
 else:
     login_section()
