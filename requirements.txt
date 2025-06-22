@@ -4,3 +4,4 @@ streamlit-extras
 qrcode
 mysql-connector-python
 fpdf
+supabase
