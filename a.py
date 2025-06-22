@@ -403,9 +403,10 @@ FAKE_PASSWORD = "pass123"
 
 
 # ---------------------- AUTH SECTION ----------------------
-def login_section():
-    # st.set_page_config(page_title="BUzaato Login", layout="centered")
+FAKE_USERNAME = "admin"
+FAKE_PASSWORD = "pass123"
 
+def login_section():
     st.markdown("""
     <style>
     body {
@@ -441,17 +442,6 @@ def login_section():
         margin-bottom: 2rem;
     }
 
-    .stTextInput>div>div>input {
-        background-color: #f9fbfd;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
-        padding: 0.5rem;
-    }
-
-    .stTextInput label {
-        font-weight: 600;
-    }
-
     .modern-button {
         display: inline-block;
         padding: 0.6rem 1.4rem;
@@ -470,23 +460,12 @@ def login_section():
         filter: brightness(1.05);
         box-shadow: 0 4px 14px rgba(108, 99, 255, 0.25);
     }
-
-    .stTabs [data-baseweb="tab-list"] {
-        display: flex;
-        justify-content: space-around;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        font-weight: 600;
-        padding: 10px 0;
-    }
     </style>
     """, unsafe_allow_html=True)
 
-    # Branding banner above login card
+    # Branding banner
     st.markdown(f"""
     <div style='text-align:center; margin-top: -30px; margin-bottom: 20px;'>
-        <img src='data:image/png;base64,{img_base64}' width='200' style='box-shadow: 0 4px 12px rgba(0,0,0,0.1);'/>
         <h1 style='margin: 0; font-size: 36px;
             font-weight: 800;
             background: linear-gradient(45deg, #6c63ff, #ff6584);
@@ -496,33 +475,26 @@ def login_section():
         </h1>
         <p style='color:gray; font-size:16px; margin-top: -8px;'>Campus Food Reimagined 🍽️</p>
     </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-    # Login Card Container
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("<h1>🔐 BUzaato Login</h1>", unsafe_allow_html=True)
-    st.markdown("<p>Your one-stop campus food assistant 🍔</p>", unsafe_allow_html=True)
+    # Login Card UI
+    with st.container():
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("<h1>🔐 BUzaato Login</h1>", unsafe_allow_html=True)
+        st.markdown("<p>Your one-stop campus food assistant 🍔</p>", unsafe_allow_html=True)
 
-    # Tabs
-    tab1, tab2 = st.tabs(["🔓 Login", "🆕 Sign Up"])
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
 
-    # 🔓 Login Tab
+        if st.button("Login", key="login_button"):
+            if username == FAKE_USERNAME and password == FAKE_PASSWORD:
+                st.success(f"✅ Welcome, {username}!")
+                st.session_state.logged_in = True
+                st.session_state.username = username
+            else:
+                st.error("❌ Invalid credentials. Try again.")
 
-    
-    st.sidebar.subheader("🔐 Login")
-
-    username = st.sidebar.text_input("Username")
-    password = st.sidebar.text_input("Password", type="password")
-
-    if st.sidebar.button("Login"):
-        if username == FAKE_USERNAME and password == FAKE_PASSWORD:
-            st.success(f"✅ Welcome, {username}!")
-            st.session_state.logged_in = True
-            st.session_state.username = username
-        else:
-            st.error("❌ Invalid credentials. Try again.")
-
-    
+        st.markdown("</div>", unsafe_allow_html=True)
 
 def main_app():
     st.sidebar.title("🍱 BUzaato Menu Hub")
