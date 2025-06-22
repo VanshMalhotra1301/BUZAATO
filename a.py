@@ -488,7 +488,7 @@ def login_section():
             if username == FAKE_USERNAME and password == FAKE_PASSWORD:
                 st.session_state.logged_in = True
                 st.session_state.username = username
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("❌ Invalid credentials. Try again.")
 
