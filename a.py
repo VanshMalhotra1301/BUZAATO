@@ -19,6 +19,9 @@ import os
 import streamlit as st
 import time
 
+from supabase import create_client, Client
+
+
 st.set_page_config(page_title="BUzaato Login", layout="centered")
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
