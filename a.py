@@ -1,4 +1,5 @@
-from pyautogui import typewrite
+from utils import typewriter_modern  # ✅ ALREADY WORKS IN STREAMLIT
+
 from buzaato_ai import buzaato_ai_chat
 from db import create_user, check_user, insert_order, get_orders
 from datetime import datetime
