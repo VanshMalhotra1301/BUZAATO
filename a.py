@@ -1,7 +1,7 @@
 from utils import typewriter_modern  # ✅ ALREADY WORKS IN STREAMLIT
 
 from buzaato_ai import buzaato_ai_chat
-from db import create_user, check_user, insert_order, get_orders
+#from db import create_user, check_user, insert_order, get_orders
 from datetime import datetime
 import streamlit as st
 import qrcode
@@ -374,8 +374,7 @@ def record_order(user, outlet, items, total, discount, freebie):
     # Optionally log or print the order ID (for internal traceability)
     print(f"[ORDER CONFIRMED] ID: {order_id} | User: {user} | Time: {timestamp}")
 
-    # Preserve original function signature
-    insert_order(user, outlet, items, total, discount, freebie, timestamp)
+
 
 def get_pending_orders(user):
     # Simulated DB list; replace with real DB queries
@@ -399,6 +398,9 @@ def get_support_info():
         "email": "support@buzaato.in",
         "hours": "9:00 AM – 9:00 PM"
     }
+FAKE_USERNAME = "admin"
+FAKE_PASSWORD = "pass123"
+
 
 # ---------------------- AUTH SECTION ----------------------
 def login_section():
@@ -505,43 +507,22 @@ def login_section():
     tab1, tab2 = st.tabs(["🔓 Login", "🆕 Sign Up"])
 
     # 🔓 Login Tab
-    with tab1:
-        username = st.text_input("👤 Username", key="login_user")
-        password = st.text_input("🔒 Password", type="password", key="login_pass")
-        login_clicked = st.button("🚪 Login", key="login_button")
 
+    
+    st.sidebar.subheader("🔐 Login")
 
+    username = st.sidebar.text_input("Username")
+    password = st.sidebar.text_input("Password", type="password")
 
+    if st.sidebar.button("Login"):
+        if username == FAKE_USERNAME and password == FAKE_PASSWORD:
+            st.success(f"✅ Welcome, {username}!")
+            st.session_state.logged_in = True
+            st.session_state.username = username
+        else:
+            st.error("❌ Invalid credentials. Try again.")
 
-
-        if login_clicked:
-            if username == "admin" and password == "admin123":
-                st.success("✅ Admin login successful!")
-                st.markdown("Launching Admin Panel...")
-                st.stop()
-            elif check_user(username, password):
-                st.session_state.current_user = username
-                st.success(f"✅ Welcome back, {username}!")
-                typewriter_modern("Loading BUzaato dashboard for you...", delay=0.06)
-                st.rerun()
-            else:
-                st.error("❌ Invalid credentials. Please try again.")
-
-    # 🆕 Sign Up Tab
-    with tab2:
-        new_user = st.text_input("👤 Create Username", key="new_user")
-        new_pass = st.text_input("🔒 Create Password", type="password", key="new_pass")
-        signup_clicked = st.button("📝 Create Account", key="signup_button")
-
-        if signup_clicked:
-            if create_user(new_user, new_pass):
-                st.success("🎉 Account created successfully!")
-                typewriter_modern(f"Welcome {new_user} to BUzaato Services 💜", delay=0.06)
-            else:
-                st.warning("⚠️ That username is already taken.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-# ---------------------- MAIN APP ----------------------
+    
 
 def main_app():
     st.sidebar.title("🍱 BUzaato Menu Hub")
