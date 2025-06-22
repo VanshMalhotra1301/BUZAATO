@@ -491,6 +491,9 @@ def login_section():
                 st.success(f"✅ Welcome, {username}!")
                 st.session_state.logged_in = True
                 st.session_state.username = username
+                main_app()
+
+            
             else:
                 st.error("❌ Invalid credentials. Try again.")
 
